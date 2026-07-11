@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/yahoo/:path*",
+      "destination": "https://query1.finance.yahoo.com/:path*"
+    },
+    {
+      "source": "/api/coingecko/:path*",
+      "destination": "https://api.coingecko.com/:path*"
+    },
+    {
+      "source": "/api/fng/:path*",
+      "destination": "https://production.dataviz.cnn.io/:path*"
+    },
+    {
+      "source": "/((?!api/|assets/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

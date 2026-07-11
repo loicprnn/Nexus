@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -m 15 -A \"Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/124.0.0.0 Safari/537.36\" -H \"referer: https://finance.yahoo.com/\" \"https://query1.finance.yahoo.com/v8/finance/spark?symbols=AAPL,%5EVIX,GC=F&range=1d&interval=5m\" -o /tmp/spark4.json -w \"HTTP %{http_code}\\\\n\")",
+      "Bash(python3 -c ' *)",
+      "Bash(npm run *)",
+      "Bash(curl -s \"http://localhost:5173/api/fred?series_id=T10Y2Y&limit=3\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
+      "Bash(curl -s \"http://localhost:5173/api/twelvedata?endpoint=quote&symbol=AAPL,MSFT,NVDA\")",
+      "Bash(curl -s \"http://localhost:5173/api/twelvedata?endpoint=quote&symbol=EUR/USD\")",
+      "Bash(sleep 63 && curl -s \"http://localhost:5173/api/twelvedata?endpoint=quote&symbol=AAPL,MSFT,NVDA\" > /tmp/td-test.json 2>&1; echo \"done\")"
+    ]
+  }
+}
