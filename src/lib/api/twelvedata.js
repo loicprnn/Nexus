@@ -108,7 +108,7 @@ export function getQuotes(symbols, { sparkline = false, interval, outputsize } =
   const tdSymbols = pairs.map(([, td]) => td)
   const origByTd = new Map(pairs.map(([orig, td]) => [td, orig]))
 
-  const key = `td:${tdSymbols.join(',')}:${sparkline ? 's' : 'q'}`
+  const key = `td:${tdSymbols.join(',')}:${sparkline ? 's' : 'q'}:${interval ?? ''}:${outputsize ?? ''}`
   return cached(key, TTL.QUOTES, async () => {
     const quoteJson = await proxyJson({ endpoint: 'quote', symbol: tdSymbols.join(',') })
     const quoteMap = keyBySymbol(quoteJson, tdSymbols)

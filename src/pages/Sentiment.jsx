@@ -96,6 +96,27 @@ function MetricCard({ label, value, count, format, sub, valueColor }) {
   )
 }
 
+// One of the 7 CNN sub-indicators: label + 0-100 bar (coloured by level) + score.
+function ComponentRow({ c }) {
+  const v = c.score
+  const barColor = sentimentColor(v)
+  return (
+    <div className="flex items-center gap-3">
+      <span className="w-36 shrink-0 text-[12px] text-secondary">{c.label}</span>
+      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-border">
+        <motion.div
+          className="h-full rounded-full"
+          style={{ backgroundColor: barColor }}
+          initial={{ width: 0 }}
+          animate={{ width: `${v ?? 0}%` }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+        />
+      </div>
+      <span className="w-7 shrink-0 text-right font-mono text-[13px] text-primary">{v ?? '—'}</span>
+    </div>
+  )
+}
+
 // Responsive 0-100 area chart with a left-to-right draw-in. Fixed 0-100 scale so
 // the Fear/Greed bands are comparable across the window.
 function HistoryChart({ data, color }) {
@@ -186,7 +207,7 @@ export default function Sentiment() {
 
   return (
     <PageContainer title="Sentiment">
-      {/* Headline + reading */}
+      {/* Headline: gauge (reduced) + the 7 sub-components */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <div className="flex flex-col items-center justify-center gap-3 rounded-card border-hairline border-border bg-card p-6 lg:col-span-1">
           <span className="nexus-label">Fear &amp; Greed Index</span>
@@ -196,7 +217,7 @@ export default function Sentiment() {
             <span className="py-10 text-[13px] text-secondary">Données indisponibles</span>
           ) : (
             <>
-              <Gauge value={score} max={100} color={color} label={fg.label} size={200} />
+              <Gauge value={score} max={100} color={color} label={fg.label} size={168} />
               {delta != null && (
                 <div className="flex items-center gap-2 text-[12px] text-secondary">
                   <span>Clôture préc. {prevClose}</span>
@@ -207,38 +228,43 @@ export default function Sentiment() {
           )}
         </div>
 
-        <div className="flex flex-col gap-5 lg:col-span-2">
-          <div className="rounded-card border-hairline border-border bg-card p-6">
-            <span className="nexus-label">Lecture du marché</span>
-            <p className="mt-2 text-[14px] leading-relaxed text-primary">
-              {score == null ? 'Indicateur en cours de chargement…' : reading(score)}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-            <MetricCard
-              label="Score actuel"
-              count={score ?? undefined}
-              value="—"
-              sub={fg?.label}
-              valueColor={color}
-            />
-            <MetricCard
-              label="Put/Call (options)"
-              count={fg?.putCall ?? undefined}
-              value="—"
-              sub="Sous-indicateur CNN, 0-100"
-            />
-            <MetricCard
-              label="VIX (volatilité)"
-              count={vix?.value ?? undefined}
-              format={(v) => v.toFixed(2)}
-              value="—"
-              sub={vix ? `Dernière donnée : ${vix.date}` : 'FRED · VIXCLS'}
-              valueColor={vix ? (vix.value > 20 ? '#F59E0B' : '#22C55E') : undefined}
-            />
+        <div className="rounded-card border-hairline border-border bg-card p-6 lg:col-span-2">
+          <span className="nexus-label">Composants de l'indice</span>
+          <div className="mt-4 grid grid-cols-1 gap-x-8 gap-y-3.5 sm:grid-cols-2">
+            {fg?.components?.length ? (
+              fg.components.map((c) => <ComponentRow key={c.label} c={c} />)
+            ) : (
+              <p className="text-[13px] text-secondary">Composants indisponibles</p>
+            )}
           </div>
         </div>
+      </div>
+
+      {/* Reading */}
+      <div className="mt-5 rounded-card border-hairline border-border bg-card p-6">
+        <span className="nexus-label">Lecture du marché</span>
+        <p className="mt-2 text-[14px] leading-relaxed text-primary">
+          {score == null ? 'Indicateur en cours de chargement…' : reading(score)}
+        </p>
+      </div>
+
+      {/* Key metrics */}
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
+        <MetricCard label="Score actuel" count={score ?? undefined} value="—" sub={fg?.label} valueColor={color} />
+        <MetricCard
+          label="Put/Call (options)"
+          count={fg?.putCall ?? undefined}
+          value="—"
+          sub="Sous-indicateur CNN, 0-100"
+        />
+        <MetricCard
+          label="VIX (volatilité)"
+          count={vix?.value ?? undefined}
+          format={(v) => v.toFixed(2)}
+          value="—"
+          sub={vix ? `Dernière donnée : ${vix.date}` : 'FRED · VIXCLS'}
+          valueColor={vix ? (vix.value > 20 ? '#F59E0B' : '#22C55E') : undefined}
+        />
       </div>
 
       {/* 30-day Fear & Greed history */}

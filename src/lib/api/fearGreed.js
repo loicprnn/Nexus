@@ -13,8 +13,8 @@ const RATING_FR = {
 
 export function getFearGreed() {
   // Cache key carries a version: bumped when the returned shape changes (added
-  // history / put-call series) so stale-shaped cached values aren't reused.
-  return cached('fng:cnn:v2', TTL.FEAR_GREED, async () => {
+  // history / put-call series / 7 sub-components) so stale cached values aren't reused.
+  return cached('fng:cnn:v3', TTL.FEAR_GREED, async () => {
     const res = await fetch('/api/fng/index/fearandgreed/graphdata')
     if (!res.ok) throw new Error(`Fear & Greed: HTTP ${res.status}`)
     const json = await res.json()
@@ -45,6 +45,22 @@ export function getFearGreed() {
     const putCallSeries = pcRaw.slice(-30).map((p) => p.y)
     const putCallRatio = pcRaw.length ? pcRaw[pcRaw.length - 1].y : null
 
+    // The 7 sub-indicators that make up the composite index (each 0-100).
+    const SUBS = [
+      ['Momentum', 'market_momentum_sp500'],
+      ['Force des prix', 'stock_price_strength'],
+      ['Largeur du marché', 'stock_price_breadth'],
+      ['Put/Call', 'put_call_options'],
+      ['Volatilité', 'market_volatility_vix'],
+      ['Valeurs refuges', 'safe_haven_demand'],
+      ['Junk bonds', 'junk_bond_demand'],
+    ]
+    const components = SUBS.map(([label, key]) => ({
+      label,
+      score: json?.[key]?.score != null ? Math.round(json[key].score) : null,
+      rating: (json?.[key]?.rating ?? '').toLowerCase() || null,
+    }))
+
     return {
       score,
       rating,
@@ -54,6 +70,7 @@ export function getFearGreed() {
       history,
       putCallSeries,
       putCallRatio,
+      components,
     }
   })
 }

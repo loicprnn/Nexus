@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { IconX, IconPlus, IconSparkles, IconArrowUpRight, IconArrowDownRight } from '@tabler/icons-react'
+import { motion, useReducedMotion } from 'framer-motion'
 import PageContainer from '../components/ui/PageContainer'
 import Sparkline from '../components/ui/Sparkline'
 import { useQuotes } from '../hooks/useMarketData'
@@ -7,8 +8,70 @@ import { TRADABLE_UNIVERSE, SYMBOL_NAMES } from '../lib/api/symbols'
 import { formatPrice, formatPct } from '../lib/format'
 import { askClaude } from '../lib/api/claude'
 
-const SERIES_COLORS = ['#10B981', '#22C55E', '#F59E0B', '#A855F7']
+// Distinct categorical hues (one per asset) — emerald first (brand), then amber,
+// violet, sky — chosen to stay legible when overlaid on the comparison chart.
+const SERIES_COLORS = ['#10B981', '#F59E0B', '#A855F7', '#38BDF8']
 const MAX_ASSETS = 4
+
+// Trading-day counts per range for the daily performance chart.
+const RANGES = [
+  { key: '1M', size: 22 },
+  { key: '3M', size: 66 },
+  { key: '6M', size: 132 },
+  { key: '1A', size: 252 },
+]
+
+// Overlaid, rebased (% from start) performance lines with a neon glow. Each
+// asset keeps its own colour; a dashed zero baseline anchors the comparison.
+function PerformanceChart({ series }) {
+  const reduce = useReducedMotion()
+  if (!series.length) {
+    return <p className="py-10 text-center text-[12px] text-secondary">Données indisponibles</p>
+  }
+  const W = 800
+  const H = 240
+  const pad = 8
+  const vals = series.flatMap((s) => s.data)
+  const min = Math.min(0, ...vals)
+  const max = Math.max(0, ...vals)
+  const span = max - min || 1
+  const xOf = (i, len) => pad + (len <= 1 ? 0 : (i / (len - 1)) * (W - 2 * pad))
+  const yOf = (v) => pad + (1 - (v - min) / span) * (H - 2 * pad)
+  const zeroY = yOf(0)
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="w-full" style={{ height: H }}>
+      <line
+        x1={pad}
+        x2={W - pad}
+        y1={zeroY}
+        y2={zeroY}
+        stroke="#2A2A2A"
+        strokeWidth="1"
+        strokeDasharray="4 4"
+      />
+      {series.map((s) => {
+        const pts = s.data.map((v, i) => `${xOf(i, s.data.length).toFixed(1)},${yOf(v).toFixed(1)}`).join(' ')
+        return (
+          <motion.polyline
+            key={s.sym}
+            points={pts}
+            fill="none"
+            stroke={s.color}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+            style={{ filter: `drop-shadow(0 0 6px ${s.color})` }}
+            initial={reduce ? false : { pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 0.9, ease: 'easeInOut' }}
+          />
+        )
+      })}
+    </svg>
+  )
+}
 
 // Standard deviation of period-over-period returns of the intraday series,
 // expressed in %. A simple, transparent volatility proxy for the session.
@@ -43,11 +106,36 @@ export default function Comparer() {
   const [symbols, setSymbols] = useState(['AAPL', 'MSFT'])
   const [analysis, setAnalysis] = useState({ text: '', loading: false, error: null })
 
+  const [range, setRange] = useState('1M')
+
   const { data: quotes, loading } = useQuotes(symbols, { sparkline: true })
   const bySymbol = useMemo(
     () => Object.fromEntries((quotes ?? []).map((q) => [q.symbol, q])),
     [quotes],
   )
+
+  // Daily series for the selected range → rebased performance lines.
+  const rangeSize = RANGES.find((r) => r.key === range)?.size ?? 22
+  const { data: histQuotes, loading: histLoading } = useQuotes(symbols, {
+    sparkline: true,
+    interval: '1day',
+    outputsize: rangeSize,
+  })
+  const perfSeries = useMemo(() => {
+    const hist = Object.fromEntries((histQuotes ?? []).map((q) => [q.symbol, q.series]))
+    return symbols
+      .map((sym, i) => {
+        const s = hist[sym]
+        if (!s || s.length < 2 || !s[0]) return null
+        const base = s[0]
+        return {
+          sym,
+          color: SERIES_COLORS[i % SERIES_COLORS.length],
+          data: s.map((v) => (v / base - 1) * 100),
+        }
+      })
+      .filter(Boolean)
+  }, [histQuotes, symbols])
 
   const available = TRADABLE_UNIVERSE.filter((t) => !symbols.includes(t.symbol))
 
@@ -201,6 +289,54 @@ export default function Comparer() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Comparative performance chart */}
+      <div className="mt-4 rounded-card border-hairline border-border bg-card p-5">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <span className="text-[13px] font-semibold text-primary">Performance comparée (rebasée à 0)</span>
+          <div className="flex gap-1">
+            {RANGES.map((r) => (
+              <button
+                key={r.key}
+                type="button"
+                onClick={() => setRange(r.key)}
+                className={[
+                  'rounded-full px-3 py-1 text-[12px] font-medium transition-colors',
+                  range === r.key
+                    ? 'bg-accent text-white'
+                    : 'text-secondary hover:bg-hover hover:text-primary',
+                ].join(' ')}
+              >
+                {r.key}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {histLoading && perfSeries.length === 0 ? (
+          <p className="py-10 text-center text-[12px] text-secondary">Chargement de l'historique…</p>
+        ) : (
+          <PerformanceChart series={perfSeries} />
+        )}
+
+        {perfSeries.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+            {perfSeries.map((s) => {
+              const last = s.data[s.data.length - 1]
+              return (
+                <span key={s.sym} className="inline-flex items-center gap-1.5 text-[12px]">
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+                  <span className="font-medium text-primary">{s.sym}</span>
+                  <span className={last >= 0 ? 'text-up' : 'text-down'}>
+                    {last >= 0 ? '+' : ''}
+                    {last.toFixed(2)}%
+                  </span>
+                </span>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* Claude analysis */}

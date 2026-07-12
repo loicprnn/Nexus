@@ -8,7 +8,14 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
       "Bash(curl -s \"http://localhost:5173/api/twelvedata?endpoint=quote&symbol=AAPL,MSFT,NVDA\")",
       "Bash(curl -s \"http://localhost:5173/api/twelvedata?endpoint=quote&symbol=EUR/USD\")",
-      "Bash(sleep 63 && curl -s \"http://localhost:5173/api/twelvedata?endpoint=quote&symbol=AAPL,MSFT,NVDA\" > /tmp/td-test.json 2>&1; echo \"done\")"
+      "Bash(sleep 63 && curl -s \"http://localhost:5173/api/twelvedata?endpoint=quote&symbol=AAPL,MSFT,NVDA\" > /tmp/td-test.json 2>&1; echo \"done\")",
+      "Bash(git commit *)",
+      "Bash(git remote *)",
+      "Bash(git ls-remote *)",
+      "Bash(git push *)",
+      "Bash(curl -s \"http://localhost:3000/api/fng/index/fearandgreed/graphdata\")",
+      "Bash(curl -s -o /tmp/cnn.json -w \"HTTP %{http_code}\\\\n\" \"http://localhost:3000/api/fng/index/fearandgreed/graphdata\")",
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('/tmp/cnn.json'\\)\\); print\\('score momentum =', d.get\\('market_momentum_sp500',{}\\).get\\('score'\\)\\)\")"
     ]
   }
 }

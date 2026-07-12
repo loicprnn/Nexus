@@ -56,7 +56,7 @@ const INDICATORS = [
     id: 'M2SL',
     label: 'Masse monétaire M2',
     note: 'Agrégat M2 — corrélé aux marchés sur le long terme.',
-    fmt: (v) => `${new Intl.NumberFormat('de-CH', { maximumFractionDigits: 0 }).format(v)} Md $`,
+    fmt: (v) => `${(v / 1000).toFixed(2)} Tr $`, // M2 en milliers de milliards (tient sur une ligne)
     deltaSuffix: ' Md $',
     color: '#10B981',
   },
@@ -93,7 +93,7 @@ function MacroCard({ id, label, note, fmt, yoy, color, deltaSuffix = ' pp' }) {
       ) : (
         <>
           <div className="flex items-baseline justify-between gap-2">
-            <span className="text-[28px] font-semibold leading-none">
+            <span className="whitespace-nowrap text-[28px] font-semibold leading-none">
               <CountUp value={data.value} format={fmt} />
             </span>
             <Delta change={data.change} suffix={deltaSuffix} />

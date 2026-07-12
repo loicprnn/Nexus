@@ -50,7 +50,9 @@ function usePolling(fetcher, intervalMs, key) {
 }
 
 export function useQuotes(symbols, opts) {
-  const key = `quotes:${symbols.join(',')}:${opts?.sparkline ? 's' : 'q'}`
+  // Key includes interval/outputsize so different ranges (e.g. the Comparer
+  // performance chart's 1M/3M/6M/1A) refetch instead of sharing one series.
+  const key = `quotes:${symbols.join(',')}:${opts?.sparkline ? 's' : 'q'}:${opts?.interval ?? ''}:${opts?.outputsize ?? ''}`
   return usePolling(() => getQuotes(symbols, opts), TTL.QUOTES, key)
 }
 
