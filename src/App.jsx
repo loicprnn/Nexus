@@ -6,7 +6,6 @@ import Dashboard from './pages/Dashboard'
 import Analyse from './pages/Analyse'
 import PaperTrading from './pages/PaperTrading'
 import NexusCoach from './pages/NexusCoach'
-import Markets from './pages/Markets'
 import Macro from './pages/Macro'
 import IndicateursAvances from './pages/IndicateursAvances'
 import Sentiment from './pages/Sentiment'
@@ -31,7 +30,6 @@ export default function App() {
         <Route path="analyse" element={<Analyse />} />
         <Route path="paper-trading" element={<PaperTrading />} />
         <Route path="coach" element={<NexusCoach />} />
-        <Route path="markets" element={<Markets />} />
         <Route path="macro" element={<Macro />} />
         <Route path="indicateurs" element={<IndicateursAvances />} />
         <Route path="sentiment" element={<Sentiment />} />

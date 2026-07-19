@@ -13,8 +13,9 @@ import {
 import { motion, useReducedMotion } from 'framer-motion'
 import PageContainer from '../components/ui/PageContainer'
 import Sparkline from '../components/ui/Sparkline'
+import PriceChart from '../components/analyse/PriceChart'
 import CountUp from '../components/ui/CountUp'
-import { useQuotes, useFearGreed, useIndicator, useFundamentals } from '../hooks/useMarketData'
+import { useQuotes, useFearGreed, useIndicator, useFundamentals, useOhlc } from '../hooks/useMarketData'
 import { TRADABLE_UNIVERSE, SYMBOL_NAMES } from '../lib/api/symbols'
 import { formatPrice, formatPct } from '../lib/format'
 import { getAssetAnalysis } from '../lib/api/claude'
@@ -46,7 +47,7 @@ function Metric({ label, value, tone = 'neutral' }) {
 // A dimension card (Technique / Fondamental / Sentiment / Macro).
 function DimensionBlock({ icon: Icon, title, sub, children }) {
   return (
-    <div className="rounded-card border-hairline border-border bg-card p-4">
+    <div className="nexus-card p-4">
       <div className="mb-2 flex items-center justify-between gap-2">
         <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-primary">
           <Icon size={15} stroke={1.5} className="text-accent" />
@@ -107,6 +108,22 @@ export default function Analyse() {
 
   const { data: fundamentals, loading: fundLoading } = useFundamentals(symbol)
 
+  // Daily OHLC for the line/candlestick price chart (Twelve Data). Indexed +
+  // labelled here so the chart stays a pure renderer.
+  const { data: ohlc } = useOhlc(symbol, { interval: '1day', outputsize: 60 })
+  const candles = useMemo(() => {
+    if (!ohlc?.length) return []
+    const fmt = new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short' })
+    return ohlc.map((c, i) => ({
+      ...c,
+      i,
+      label: (() => {
+        const d = new Date(c.time)
+        return Number.isNaN(d.getTime()) ? c.time : fmt.format(d)
+      })(),
+    }))
+  }, [ohlc])
+
   const meta = TRADABLE_UNIVERSE.find((t) => t.symbol === symbol)
   const name = SYMBOL_NAMES[symbol] ?? symbol
 
@@ -166,7 +183,7 @@ export default function Analyse() {
       title="Analyse"
       description="Analyse complète d'un actif en quatre axes — technique, fondamental, sentiment et macro — avec un score global /10 et une synthèse générée par Nexus."
       actions={
-        <label className="inline-flex shrink-0 items-center gap-2 rounded-card border-hairline border-border bg-card px-3 py-2 text-[13px] text-secondary">
+        <label className="inline-flex shrink-0 items-center gap-2 nexus-card px-3 py-2 text-[13px] text-secondary">
           <IconSearch size={15} stroke={1.5} />
           <select
             value={symbol}
@@ -188,13 +205,13 @@ export default function Analyse() {
       {/* Header + score */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* Identity + price */}
-        <div className="rounded-card border-hairline border-border bg-card p-5 lg:col-span-2">
+        <div className="nexus-card p-5 lg:col-span-2">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-[18px] font-semibold text-primary">{symbol}</span>
                 {meta?.kind && (
-                  <span className="rounded-full border-hairline border-border px-2 py-0.5 text-[10px] uppercase tracking-wide text-secondary">
+                  <span className="rounded-full bg-hover px-2 py-0.5 text-[10px] uppercase tracking-wide text-secondary">
                     {meta.kind}
                   </span>
                 )}
@@ -228,20 +245,26 @@ export default function Analyse() {
               )}
             </div>
           </div>
-          {quote?.series?.length > 1 && (
+          {candles.length > 1 ? (
             <div className="mt-4">
-              <Sparkline
-                data={quote.series}
-                color={changeUp ? '#22C55E' : '#EF4444'}
-                width={620}
-                height={64}
-              />
+              <PriceChart data={candles} />
             </div>
+          ) : (
+            quote?.series?.length > 1 && (
+              <div className="mt-4">
+                <Sparkline
+                  data={quote.series}
+                  color={changeUp ? '#22C55E' : '#EF4444'}
+                  width={620}
+                  height={64}
+                />
+              </div>
+            )
           )}
         </div>
 
         {/* Global score */}
-        <div className="rounded-card border-hairline border-border bg-card p-5">
+        <div className="nexus-card p-5">
           <p className="nexus-label">Score global Nexus</p>
           <div className="mt-2 flex items-end gap-2">
             <span className="text-[44px] font-semibold leading-none" style={{ color: sColor }}>
@@ -335,7 +358,7 @@ export default function Analyse() {
       </div>
 
       {/* Claude synthesis */}
-      <div className="mt-4 rounded-card border-hairline border-border bg-card p-5">
+      <div className="mt-4 nexus-card p-5">
         <div className="flex items-center justify-between gap-3">
           <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-primary">
             <IconSparkles size={15} stroke={1.5} className="text-accent" />

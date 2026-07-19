@@ -16,6 +16,11 @@ const initEngine = async (engine) => {
 // rendering at all. ParticlesProvider only renders its child once the engine has
 // loaded, so it gates just this subtree (not the app).
 export default function ParticleBackground() {
+  // Disabled on the light theme — white particles would be invisible on the
+  // #F5F5F0 background and the clean fintech look reads better without them.
+  return null
+
+  // eslint-disable-next-line no-unreachable
   const reduceMotion =
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches

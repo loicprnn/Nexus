@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { IconRefresh } from '@tabler/icons-react'
 import PageContainer from '../components/ui/PageContainer'
 import PortfolioSummary from '../components/paper/PortfolioSummary'
+import MonthlyPerformance from '../components/paper/MonthlyPerformance'
 import TradeTicket from '../components/paper/TradeTicket'
 import PositionsTable from '../components/paper/PositionsTable'
 import TradeHistory from '../components/paper/TradeHistory'
@@ -14,6 +15,7 @@ import {
   resetAccount,
   valuate,
   openPositions,
+  monthlyRealizedPnl,
   validateOrder,
   ensureBenchmarkStart,
   getBenchmarkStart,
@@ -90,6 +92,8 @@ export default function PaperTrading() {
   }, [spyNow])
   const benchmarkPct = spyNow && benchStart ? (spyNow / benchStart - 1) * 100 : null
   const alpha = benchmarkPct != null ? valuation.totalPnlPct - benchmarkPct : null
+
+  const monthlyPnl = useMemo(() => monthlyRealizedPnl(account.trades, 6), [account.trades])
 
   const selectedQuote = priceMap[selected]
   const selectedPrice = selectedQuote?.price ?? null
@@ -177,7 +181,7 @@ export default function PaperTrading() {
     <button
       type="button"
       onClick={() => setConfirmReset(true)}
-      className="inline-flex items-center gap-1.5 rounded-card border-hairline border-border bg-card px-3 py-1.5 text-[13px] text-secondary transition-colors hover:text-primary"
+      className="inline-flex items-center gap-1.5 nexus-card px-3 py-1.5 text-[13px] text-secondary transition-colors hover:text-primary"
     >
       <IconRefresh size={15} stroke={1.5} />
       Réinitialiser
@@ -204,6 +208,10 @@ export default function PaperTrading() {
         benchmarkPct={benchmarkPct}
         alpha={alpha}
       />
+
+      <div className="mt-3">
+        <MonthlyPerformance data={monthlyPnl} />
+      </div>
 
       {notice && (
         <div

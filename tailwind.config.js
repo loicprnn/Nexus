@@ -4,14 +4,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: '#0A0A0A',
-        card: '#0D1F0D', // fond de card vert sombre (identité verte globale)
-        hover: '#0D2818', // survol / actif vert
-        ticker: '#021A0E',
-        border: '#0A3D2E', // bordures subtiles vertes
-        primary: '#FFFFFF',
-        secondary: '#8AA394', // gris légèrement verdâtre
-        accent: '#10B981', // vert émeraude — couleur signature Nexus
+        bg: '#E8E8E4', // gris clair chaud (fond global — contraste avec les cards blanches)
+        card: '#FFFFFF', // cards blanc pur
+        hover: '#F0EFEA', // survol clair
+        ticker: '#FFFFFF',
+        border: '#E8E8E0', // bordures claires
+        primary: '#0A0A0A', // texte primaire
+        secondary: '#888880', // texte secondaire
+        accent: '#F97316', // orange — couleur signature Nexus (thème clair)
         up: '#22C55E',
         down: '#EF4444',
       },

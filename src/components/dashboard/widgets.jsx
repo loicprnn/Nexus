@@ -109,7 +109,7 @@ export function NexusScoreWidget() {
   return (
     <WidgetState loading={loading} empty={!hasData}>
       <div className="flex h-full flex-col items-center justify-center gap-2">
-        <Gauge value={score ?? 0} label="Nexus Score" color="#10B981" size={132} />
+        <Gauge value={score ?? 0} label="Nexus Score" color="#F97316" size={132} />
         <p className="max-w-[200px] text-center text-[12px] text-secondary">{blurb}</p>
       </div>
     </WidgetState>

@@ -6,15 +6,15 @@ import {
   IconLayoutSidebarLeftExpand,
 } from '@tabler/icons-react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { SIDEBAR_ITEMS } from '../../lib/navigation'
+import { PRIMARY_NAV, MARKETS_NAV, SETTINGS_NAV } from '../../lib/navigation'
 import Logo from '../ui/Logo'
 
 const STORAGE_KEY = 'nexus.sidebar.collapsed'
 const RAIL = 60 // collapsed width (icons only)
 const PANEL = 240 // expanded width (icons + labels)
+const ACTIVE = '#F59E0B' // orange — active nav highlight
 
-// Reactive media query (used to know when we're on the desktop/tablet layout
-// where the rail collapses, vs the mobile slide-over drawer).
+// Reactive media query (desktop rail vs mobile drawer).
 function useMediaQuery(query) {
   const [matches, setMatches] = useState(() =>
     typeof window !== 'undefined' ? window.matchMedia(query).matches : false,
@@ -44,11 +44,51 @@ function ItemLabel({ children }) {
   )
 }
 
-// Left sidebar — secondary navigation.
-// Desktop/tablet: a collapsible rail. Closed by default (60px, icons only);
-// a toggle expands it to 240px (icons + labels). The open/closed state persists
-// in localStorage. Mobile: a fixed slide-over drawer (always labelled), driven
-// by `mobileOpen` from the layout's hamburger.
+// A single navigation item. `primary` items (the top group) are slightly larger
+// and brighter than the secondary "Marchés" group. Active = orange tint bg +
+// orange 3px left border + orange icon/label.
+function NavItem({ item, expanded, onClose, primary = false }) {
+  const { to, label, icon: Icon, end } = item
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      onClick={onClose}
+      title={expanded ? undefined : label}
+      className={({ isActive }) =>
+        [
+          'flex items-center gap-3 rounded-card border-l-[3px] px-3 transition-colors',
+          primary ? 'py-2.5 text-[14px]' : 'py-2 text-[13px]',
+          expanded ? 'justify-start' : 'justify-center',
+          isActive
+            ? 'border-[#F97316] bg-[#FFF4EE] text-[#F97316]'
+            : primary
+              ? 'border-transparent text-primary hover:bg-hover'
+              : 'border-transparent text-secondary hover:bg-hover hover:text-primary',
+        ].join(' ')
+      }
+    >
+      <Icon size={primary ? 21 : 20} stroke={1.5} className="shrink-0" />
+      <AnimatePresence initial={false}>
+        {expanded && <ItemLabel key="label">{label}</ItemLabel>}
+      </AnimatePresence>
+    </NavLink>
+  )
+}
+
+// Small uppercase section label — only shown when the rail is expanded.
+function SectionLabel({ children, expanded }) {
+  if (!expanded) return null
+  return (
+    <p className="px-3 pb-1.5 pt-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#AAAAAA]">
+      {children}
+    </p>
+  )
+}
+
+// Left sidebar — two grouped sections (Principal / Marchés) + Paramètres pinned
+// at the bottom. Desktop: a collapsible rail (persisted in localStorage). Mobile:
+// a slide-over drawer driven by `mobileOpen`.
 export default function Sidebar({ mobileOpen, onClose }) {
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const [collapsed, setCollapsed] = useState(() => {
@@ -61,12 +101,10 @@ export default function Sidebar({ mobileOpen, onClose }) {
     try {
       localStorage.setItem(STORAGE_KEY, String(collapsed))
     } catch {
-      // private mode / quota — non-fatal, just won't persist
+      // private mode / quota — non-fatal
     }
   }, [collapsed])
 
-  // On mobile the drawer is always fully labelled; only the desktop rail
-  // collapses.
   const expanded = isDesktop ? !collapsed : true
   const width = isDesktop ? (collapsed ? RAIL : PANEL) : PANEL
 
@@ -81,18 +119,16 @@ export default function Sidebar({ mobileOpen, onClose }) {
         initial={false}
         animate={{ width }}
         transition={{ type: 'spring', stiffness: 380, damping: 34 }}
-        style={{ backgroundColor: '#050F08' }}
+        style={{ backgroundColor: '#FFFFFF' }}
         className={[
-          'z-40 flex shrink-0 flex-col overflow-hidden border-r-hairline border-border',
-          // Desktop / tablet: in-flow column
+          'z-40 flex shrink-0 flex-col overflow-hidden border-r border-border',
           'md:relative md:translate-x-0',
-          // Mobile: fixed slide-over drawer
           'fixed inset-y-0 left-0 transition-transform duration-200',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
         ].join(' ')}
       >
+        {/* Header: brand + collapse toggle / mobile close */}
         <div className="flex h-14 shrink-0 items-center gap-2 px-3.5">
-          {/* Brand (logo + wordmark) — shown when expanded or on the mobile drawer */}
           <AnimatePresence initial={false}>
             {expanded && (
               <motion.span
@@ -109,7 +145,6 @@ export default function Sidebar({ mobileOpen, onClose }) {
             )}
           </AnimatePresence>
 
-          {/* Desktop collapse/expand toggle — centered alone on the collapsed rail */}
           <button
             onClick={() => setCollapsed((v) => !v)}
             className={[
@@ -126,7 +161,6 @@ export default function Sidebar({ mobileOpen, onClose }) {
             )}
           </button>
 
-          {/* Mobile close */}
           <button
             onClick={onClose}
             className="ml-auto shrink-0 text-secondary hover:text-primary md:hidden"
@@ -136,29 +170,31 @@ export default function Sidebar({ mobileOpen, onClose }) {
           </button>
         </div>
 
-        <nav className="flex flex-1 flex-col gap-1 overflow-y-auto overflow-x-hidden px-2 py-2">
-          {SIDEBAR_ITEMS.map(({ to, label, icon: Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              onClick={onClose}
-              title={expanded ? undefined : label}
-              className={({ isActive }) =>
-                [
-                  'flex items-center gap-3 rounded-card border-l-[3px] px-3 py-2.5 text-[13px] transition-colors',
-                  expanded ? 'justify-start' : 'justify-center',
-                  isActive
-                    ? 'border-[#10B981] bg-[#0D2818] text-primary'
-                    : 'border-transparent text-secondary hover:bg-hover hover:text-primary',
-                ].join(' ')
-              }
-            >
-              <Icon size={20} stroke={1.5} className="shrink-0" />
-              <AnimatePresence initial={false}>
-                {expanded && <ItemLabel key="label">{label}</ItemLabel>}
-              </AnimatePresence>
-            </NavLink>
-          ))}
+        <nav className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden px-2 py-2">
+          {/* Group 1 — Principal */}
+          <SectionLabel expanded={expanded}>Principal</SectionLabel>
+          <div className="flex flex-col gap-1">
+            {PRIMARY_NAV.map((item) => (
+              <NavItem key={item.to} item={item} expanded={expanded} onClose={onClose} primary />
+            ))}
+          </div>
+
+          {/* Separator */}
+          <div className="my-2.5 border-t-hairline border-border" />
+
+          {/* Group 2 — Marchés */}
+          <SectionLabel expanded={expanded}>Marchés</SectionLabel>
+          <div className="flex flex-col gap-1">
+            {MARKETS_NAV.map((item) => (
+              <NavItem key={item.to} item={item} expanded={expanded} onClose={onClose} />
+            ))}
+          </div>
+
+          {/* Settings pinned at the very bottom */}
+          <div className="mt-auto">
+            <div className="my-2.5 border-t-hairline border-border" />
+            <NavItem item={SETTINGS_NAV} expanded={expanded} onClose={onClose} />
+          </div>
         </nav>
       </motion.aside>
     </>

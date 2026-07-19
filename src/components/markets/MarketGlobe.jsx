@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import * as THREE from 'three'
 import Globe from 'react-globe.gl'
-import nightSky from '../../assets/globe/night-sky.png'
 import countries from '../../assets/globe/countries.json'
 import { formatPrice, formatPct } from '../../lib/format'
 
 const UP = '#22C55E'
 const DOWN = '#EF4444'
-const NEUTRAL = '#555555'
+const NEUTRAL = '#9A9A92'
 
 // Marker colour by performance sign; grey when no quote is available.
 function markerColor(pct) {
@@ -18,8 +18,8 @@ function markerColor(pct) {
 // Country fill = its market's performance: a dark base blended toward green
 // (up) or red (down), the blend intensity scaled by |% change| (saturating at
 // ±2.5%). Countries without a tracked market stay dark grey.
-const HEAT_NODATA = '#242424'
-const HEAT_BASE = [26, 26, 26]
+const HEAT_NODATA = '#D0D0CC' // continents sans données (gris clair)
+const HEAT_BASE = [208, 208, 204] // #D0D0CC → base du dégradé vers vert/rouge
 const HEAT_UP = [34, 197, 94]
 const HEAT_DOWN = [239, 68, 68]
 
@@ -41,23 +41,23 @@ function tooltipHtml(d) {
   return `
     <div style="
       font-family: Inter, system-ui, sans-serif;
-      background: #111111;
-      border: 0.5px solid #2A2A2A;
+      background: #FFFFFF;
+      border: 0.5px solid #E8E8E0;
       border-radius: 12px;
       padding: 10px 12px;
       min-width: 150px;
       pointer-events: none;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     ">
-      <div style="font-size:10px;letter-spacing:0.04em;text-transform:uppercase;color:#888888;">
+      <div style="font-size:10px;letter-spacing:0.04em;text-transform:uppercase;color:#AAAAAA;">
         ${d.city} · ${d.country}
       </div>
       <div style="display:flex;align-items:baseline;gap:6px;margin-top:2px;">
-        <span style="font-size:14px;font-weight:600;color:#ffffff;">${d.index}</span>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#888888;">${d.etf}</span>
+        <span style="font-size:14px;font-weight:600;color:#0A0A0A;">${d.index}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#888880;">${d.etf}</span>
       </div>
       <div style="display:flex;justify-content:space-between;gap:14px;margin-top:6px;">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#ffffff;">${price}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#0A0A0A;">${price}</span>
         <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:${color};">${pct}</span>
       </div>
     </div>`
@@ -94,10 +94,6 @@ export default function MarketGlobe({ markets, onHover }) {
     g.pointOfView({ lat: 32, lng: -34, altitude: 2.3 }, 0)
     // Oceans = the globe sphere itself, painted near-black. Landmasses are drawn
     // grey on top via the country-polygon layer (see <Globe> props below).
-    const mat = g.globeMaterial()
-    mat.color.set('#050505')
-    mat.emissive?.set('#000000')
-    mat.shininess = 0
     const controls = g.controls()
     controls.autoRotate = true
     controls.autoRotateSpeed = 0.35
@@ -152,6 +148,19 @@ export default function MarketGlobe({ markets, onHover }) {
     [heatKey],
   )
 
+  // Ocean sphere = soft slate blue so the globe reads clearly on the white card
+  // without being loud. Emissive keeps it visible regardless of scene lighting,
+  // with a slightly darker tone for subtle spherical shading. Built once.
+  const globeMaterial = useMemo(
+    () =>
+      new THREE.MeshPhongMaterial({
+        color: '#B8C8D4',
+        emissive: '#9FB2C0',
+        shininess: 0,
+      }),
+    [],
+  )
+
   return (
     <div ref={wrapRef} className="h-full w-full">
       {size.width > 0 && (
@@ -160,15 +169,14 @@ export default function MarketGlobe({ markets, onHover }) {
           onGlobeReady={handleReady}
           width={size.width}
           height={size.height}
+          globeMaterial={globeMaterial}
           backgroundColor="rgba(0,0,0,0)"
-          backgroundImageUrl={nightSky}
-          atmosphereColor="#10B981"
-          atmosphereAltitude={0.22}
+          showAtmosphere={false}
           polygonsData={borders}
           polygonCapColor={(f) => heatColor(perfByAdmin[f.properties?.ADMIN])}
           polygonsTransitionDuration={600}
           polygonSideColor={() => 'rgba(0,0,0,0)'}
-          polygonStrokeColor={() => 'rgba(10,10,10,0.7)'}
+          polygonStrokeColor={() => 'rgba(150,150,145,0.35)'}
           polygonAltitude={(f) => (perfByAdmin[f.properties?.ADMIN] != null ? 0.012 : 0.006)}
           polygonLabel={() => ''}
           pointsData={points}
@@ -184,7 +192,7 @@ export default function MarketGlobe({ markets, onHover }) {
           labelLat="lat"
           labelLng="lng"
           labelText={(d) => d.index}
-          labelColor={() => 'rgba(235,235,235,0.92)'}
+          labelColor={() => 'rgba(20,20,20,0.72)'}
           labelSize={0.85}
           labelDotRadius={0}
           labelResolution={2}

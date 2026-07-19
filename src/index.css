@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   * {
@@ -19,15 +19,15 @@
 
   body {
     margin: 0;
-    background-color: #0a0a0a;
-    color: #ffffff;
+    background-color: #e8e8e4;
+    color: #0a0a0a;
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Thin scrollbars, dark theme */
+  /* Thin scrollbars, light theme */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -36,34 +36,40 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #2a2a2a;
+    background: #d8d8d0;
     border-radius: 8px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #3a3a3a;
+    background: #c4c4bc;
   }
 }
 
 @layer components {
+  /* Soft elevation instead of a hairline border — the shadow alone delimits the
+     card (Finexy / Cardy Pay style). */
   .nexus-card {
-    @apply rounded-card border-hairline border-border bg-card;
+    @apply rounded-card bg-card;
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.06),
+      0 0 1px rgba(0, 0, 0, 0.04);
   }
 
   .nexus-label {
-    @apply text-[11px] font-normal uppercase tracking-wide text-secondary;
+    @apply text-[11px] font-normal uppercase tracking-wide;
+    color: #aaaaaa;
   }
 }
 
 /* React Grid Layout — theme overrides */
 .react-grid-item.react-grid-placeholder {
-  background: #10b981;
+  background: #f97316;
   opacity: 0.12;
   border-radius: 16px;
 }
 
 .react-grid-item > .react-resizable-handle::after {
-  border-right-color: #2a2a2a;
-  border-bottom-color: #2a2a2a;
+  border-right-color: #e8e8e0;
+  border-bottom-color: #e8e8e0;
 }
 
 .react-grid-item.react-draggable-dragging {

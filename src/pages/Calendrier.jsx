@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { IconCalendarEvent } from '@tabler/icons-react'
 import PageContainer from '../components/ui/PageContainer'
+import Badge from '../components/ui/Badge'
 
 // Economic calendar. There is no free, key-less calendar API, so the schedule is
 // generated from the well-known recurring cadence of the major US releases (NFP =
@@ -15,7 +16,7 @@ const WINDOW_DAYS = 42
 const IMPACT = {
   high: { tag: 'Élevé', color: '#EF4444' },
   medium: { tag: 'Moyen', color: '#F59E0B' },
-  low: { tag: 'Faible', color: '#10B981' },
+  low: { tag: 'Faible', color: '#F97316' },
 }
 
 // Snap a date onto a weekday (push Sat/Sun to the following Monday) — most US
@@ -128,7 +129,7 @@ export default function Calendrier() {
       description="Publications macro à venir (CPI, NFP, PCE, PIB) et décisions de la Fed et de la BCE, par ordre chronologique et niveau d'impact."
     >
       {groups.length === 0 ? (
-        <div className="rounded-card border-hairline border-border bg-card p-8 text-center text-[13px] text-secondary">
+        <div className="nexus-card p-8 text-center text-[13px] text-secondary">
           Aucun événement programmé dans les {WINDOW_DAYS} prochains jours.
         </div>
       ) : (
@@ -144,7 +145,7 @@ export default function Calendrier() {
                   · {g.rel}
                 </span>
               </div>
-              <div className="overflow-hidden rounded-card border-hairline border-border bg-card">
+              <div className="overflow-hidden nexus-card">
                 {g.items.map((e, i) => {
                   const imp = IMPACT[e.impact]
                   return (
@@ -158,12 +159,7 @@ export default function Calendrier() {
                         <p className="truncate text-[13px] font-medium text-primary">{e.title}</p>
                         <p className="truncate text-[11px] text-secondary">{e.detail}</p>
                       </div>
-                      <span
-                        className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium"
-                        style={{ color: imp.color, backgroundColor: `${imp.color}1A` }}
-                      >
-                        {imp.tag}
-                      </span>
+                      <Badge className="shrink-0">{imp.tag}</Badge>
                     </div>
                   )
                 })}

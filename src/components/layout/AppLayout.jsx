@@ -86,7 +86,8 @@ export default function AppLayout() {
         </div>
       </div>
 
-      <div className="relative z-10">
+      {/* Bottom bar: mobile only — desktop uses the sidebar's Principal group */}
+      <div className="relative z-10 md:hidden">
         <BottomBar />
       </div>
     </div>

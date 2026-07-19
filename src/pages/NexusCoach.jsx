@@ -20,7 +20,7 @@ function Bubble({ role, content }) {
         className={
           isUser
             ? 'max-w-[80%] rounded-card bg-accent px-3.5 py-2.5 text-[13px] leading-relaxed text-white'
-            : 'max-w-[80%] whitespace-pre-wrap rounded-card border-hairline border-border bg-card px-3.5 py-2.5 text-[13px] leading-relaxed text-primary'
+            : 'max-w-[80%] whitespace-pre-wrap nexus-card px-3.5 py-2.5 text-[13px] leading-relaxed text-primary'
         }
       >
         {content}
@@ -104,7 +104,7 @@ export default function NexusCoach() {
                     key={s}
                     type="button"
                     onClick={() => send(s)}
-                    className="rounded-card border-hairline border-border bg-card px-3 py-2.5 text-left text-[12px] text-secondary transition-colors hover:bg-hover hover:text-primary"
+                    className="nexus-card px-3 py-2.5 text-left text-[12px] text-secondary transition-colors hover:bg-hover hover:text-primary"
                   >
                     {s}
                   </button>
@@ -117,7 +117,7 @@ export default function NexusCoach() {
 
           {pending && (
             <div className="flex justify-start">
-              <div className="rounded-card border-hairline border-border bg-card px-3.5 py-2.5 text-[13px] text-secondary">
+              <div className="nexus-card px-3.5 py-2.5 text-[13px] text-secondary">
                 Le coach réfléchit…
               </div>
             </div>
@@ -133,7 +133,7 @@ export default function NexusCoach() {
         </div>
 
         {/* Barre de saisie */}
-        <div className="mt-3 flex items-end gap-2 rounded-card border-hairline border-border bg-card p-2">
+        <div className="mt-3 flex items-end gap-2 nexus-card p-2">
           <textarea
             rows={1}
             value={input}

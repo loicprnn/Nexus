@@ -59,7 +59,7 @@ export default function TickerBand() {
   const items = [...quotes, ...quotes]
 
   return (
-    <div className="h-9 shrink-0 overflow-hidden border-b-hairline border-border bg-ticker">
+    <div className="h-9 shrink-0 overflow-hidden border-b border-border bg-ticker">
       <div className="flex h-full items-center whitespace-nowrap font-mono text-[12px] animate-ticker">
         {items.map((item, i) => (
           <TickerItem key={`${item.symbol}-${i}`} {...item} />

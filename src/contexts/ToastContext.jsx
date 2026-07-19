@@ -38,7 +38,7 @@ export function ToastProvider({ children }) {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className="pointer-events-auto flex items-start gap-3 rounded-card border-hairline border-border bg-card p-3.5"
+            className="pointer-events-auto flex items-start gap-3 nexus-card p-3.5"
           >
             <IconBell
               size={18}

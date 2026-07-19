@@ -2,6 +2,7 @@ import { IconArrowUpRight, IconArrowDownRight, IconMinus } from '@tabler/icons-r
 import PageContainer from '../components/ui/PageContainer'
 import Sparkline from '../components/ui/Sparkline'
 import CountUp from '../components/ui/CountUp'
+import Badge from '../components/ui/Badge'
 import { useIndicator, useFearGreed } from '../hooks/useMarketData'
 
 // Advanced risk/volatility indicators. Every series is sourced from FRED through
@@ -9,7 +10,7 @@ import { useIndicator, useFearGreed } from '../hooks/useMarketData'
 // the VIX, but FRED publishes its daily close as VIXCLS). Each card maps the
 // latest reading to a qualitative "régime" so the page reads as analysis, not
 // just numbers. `zones` is an ordered list of thresholds, evaluated low-to-high.
-const RISK = { calm: '#22C55E', neutral: '#10B981', warning: '#F59E0B', stress: '#EF4444' }
+const RISK = { calm: '#22C55E', neutral: '#F97316', warning: '#F59E0B', stress: '#EF4444' }
 
 const INDICATORS = [
   {
@@ -106,17 +107,10 @@ function IndicatorCard({ id, label, note, fmt, unit, zones }) {
   const zone = data ? zoneFor(zones, data.value) : null
 
   return (
-    <div className="flex flex-col gap-3 rounded-card border-hairline border-border bg-card p-4">
+    <div className="nexus-card flex flex-col gap-3 p-6">
       <div className="flex items-start justify-between gap-2">
         <span className="text-[12px] font-semibold text-primary">{label}</span>
-        {zone && (
-          <span
-            className="rounded-full px-2 py-0.5 text-[10px] font-medium"
-            style={{ color: zone.color, backgroundColor: `${zone.color}1A` }}
-          >
-            {zone.tag}
-          </span>
-        )}
+        {zone && <Badge color={zone.color}>{zone.tag}</Badge>}
       </div>
 
       {loading ? (
@@ -134,7 +128,7 @@ function IndicatorCard({ id, label, note, fmt, unit, zones }) {
             </span>
             <Delta change={data.change} unit={unit} />
           </div>
-          <Sparkline data={data.series} color={zone?.color ?? '#10B981'} width={260} height={48} />
+          <Sparkline data={data.series} color={zone?.color ?? '#F97316'} width={260} height={48} />
           <span className="text-[10px] text-secondary">Dernière donnée : {data.date}</span>
         </>
       )}
@@ -151,21 +145,14 @@ function PutCallCard() {
   const score = data?.putCall
   const known = score != null
   const high = known && score >= 60 // CNN scores HIGH = call-heavy = greedy
-  const color = !known ? '#10B981' : high ? RISK.warning : score <= 40 ? RISK.stress : RISK.neutral
+  const color = !known ? '#F97316' : high ? RISK.warning : score <= 40 ? RISK.stress : RISK.neutral
   const tag = !known ? '' : high ? 'Optimiste' : score <= 40 ? 'Couverture' : 'Neutre'
 
   return (
-    <div className="flex flex-col gap-3 rounded-card border-hairline border-border bg-card p-4">
+    <div className="nexus-card flex flex-col gap-3 p-6">
       <div className="flex items-start justify-between gap-2">
         <span className="text-[12px] font-semibold text-primary">Put/Call (options)</span>
-        {tag && (
-          <span
-            className="rounded-full px-2 py-0.5 text-[10px] font-medium"
-            style={{ color, backgroundColor: `${color}1A` }}
-          >
-            {tag}
-          </span>
-        )}
+        {tag && <Badge color={color}>{tag}</Badge>}
       </div>
 
       {loading ? (

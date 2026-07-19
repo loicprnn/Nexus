@@ -10,7 +10,7 @@ import { askClaude } from '../lib/api/claude'
 
 // Distinct categorical hues (one per asset) — emerald first (brand), then amber,
 // violet, sky — chosen to stay legible when overlaid on the comparison chart.
-const SERIES_COLORS = ['#10B981', '#F59E0B', '#A855F7', '#38BDF8']
+const SERIES_COLORS = ['#F97316', '#F59E0B', '#A855F7', '#38BDF8']
 const MAX_ASSETS = 4
 
 // Trading-day counts per range for the daily performance chart.
@@ -62,7 +62,6 @@ function PerformanceChart({ series }) {
             strokeLinecap="round"
             strokeLinejoin="round"
             vectorEffect="non-scaling-stroke"
-            style={{ filter: `drop-shadow(0 0 6px ${s.color})` }}
             initial={reduce ? false : { pathLength: 0 }}
             animate={{ pathLength: 1 }}
             transition={{ duration: 0.9, ease: 'easeInOut' }}
@@ -235,7 +234,7 @@ export default function Comparer() {
       </div>
 
       {/* Comparison table */}
-      <div className="overflow-x-auto rounded-card border-hairline border-border bg-card">
+      <div className="overflow-x-auto nexus-card">
         <table className="w-full min-w-[680px] text-[13px]">
           <thead>
             <tr className="border-b border-border text-left text-[11px] uppercase tracking-wide text-secondary">
@@ -292,7 +291,7 @@ export default function Comparer() {
       </div>
 
       {/* Comparative performance chart */}
-      <div className="mt-4 rounded-card border-hairline border-border bg-card p-5">
+      <div className="mt-4 nexus-card p-5">
         <div className="mb-3 flex items-center justify-between gap-3">
           <span className="text-[13px] font-semibold text-primary">Performance comparée (rebasée à 0)</span>
           <div className="flex gap-1">
@@ -340,7 +339,7 @@ export default function Comparer() {
       </div>
 
       {/* Claude analysis */}
-      <div className="mt-4 rounded-card border-hairline border-border bg-card p-5">
+      <div className="mt-4 nexus-card p-5">
         <div className="flex items-center justify-between gap-3">
           <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-primary">
             <IconSparkles size={15} stroke={1.5} className="text-accent" />

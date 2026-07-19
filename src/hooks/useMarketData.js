@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { getQuotes } from '../lib/api/quotes'
+import { getOhlcSeries } from '../lib/api/twelvedata'
 import { getFundamentals } from '../lib/api/edgar'
 import { getCryptoMarkets } from '../lib/api/coingecko'
 import { getFearGreed } from '../lib/api/fearGreed'
@@ -120,6 +121,13 @@ export function useChunkedQuotes(
 export function useFundamentals(symbol) {
   const key = `fmp:${symbol}`
   return usePolling(() => getFundamentals(symbol), TTL.MACRO, key)
+}
+
+// OHLC candles for the Analyse candlestick chart (Twelve Data time_series).
+// Returns [] for symbols Twelve Data can't serve, so the chart falls back to line.
+export function useOhlc(symbol, { interval = '1day', outputsize = 60 } = {}) {
+  const key = `ohlc:${symbol}:${interval}:${outputsize}`
+  return usePolling(() => getOhlcSeries(symbol, { interval, outputsize }), TTL.QUOTES, key)
 }
 
 export function useCryptos(ids, opts) {

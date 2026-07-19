@@ -11,12 +11,12 @@ import { motion, useReducedMotion } from 'framer-motion'
 // but never wider than its container.
 export default function Sparkline({
   data = [],
-  color = '#10B981',
+  color = '#F97316',
   width = 140,
   height = 44,
   strokeWidth = 1.5,
   fill = false,
-  glow = true,
+  glow = false,
 }) {
   const gradientId = useId()
   const reduce = useReducedMotion()

@@ -34,7 +34,7 @@ export default function TradeTicket({
     <button
       type="button"
       onClick={() => onSideChange(value)}
-      className={`flex-1 rounded-[10px] px-3 py-1.5 text-[13px] transition-colors ${
+      className={`flex-1 rounded-[10px] px-3 py-1.5 text-[13px] font-medium transition-colors ${
         side === value ? activeClass : 'text-secondary hover:text-primary'
       }`}
     >
@@ -48,8 +48,8 @@ export default function TradeTicket({
 
       {/* Side */}
       <div className="inline-flex rounded-card border-hairline border-border bg-bg p-1">
-        {sideBtn('buy', 'Acheter', 'bg-up/15 text-up')}
-        {sideBtn('sell', 'Vendre', 'bg-down/15 text-down')}
+        {sideBtn('buy', 'Acheter', 'bg-up text-white')}
+        {sideBtn('sell', 'Vendre', 'bg-down text-white')}
       </div>
 
       {/* Instrument */}
@@ -127,8 +127,8 @@ export default function TradeTicket({
         disabled={busy || Boolean(error) || numericQty <= 0}
         className={`rounded-[10px] px-3 py-2.5 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
           side === 'buy'
-            ? 'bg-up/90 text-black hover:bg-up'
-            : 'bg-down/90 text-white hover:bg-down'
+            ? 'bg-up text-white hover:opacity-90'
+            : 'bg-down text-white hover:opacity-90'
         }`}
       >
         {busy ? 'Exécution…' : side === 'buy' ? 'Acheter' : 'Vendre'}

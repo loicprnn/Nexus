@@ -29,18 +29,18 @@ const SECTORS = [
 const SECTOR_SYMBOLS = SECTORS.map((s) => s.symbol)
 
 function fearGreedColor(score) {
-  if (score == null) return '#10B981'
+  if (score == null) return '#F97316'
   if (score < 25) return '#EF4444'
   if (score < 45) return '#F59E0B'
-  if (score < 55) return '#10B981'
+  if (score < 55) return '#F97316'
   return '#22C55E'
 }
 
 // 0-100 sentiment → design-system color (shared by sector bars).
 function sentimentColor(v) {
-  if (v == null) return '#10B981'
+  if (v == null) return '#F97316'
   if (v >= 60) return '#22C55E'
-  if (v >= 45) return '#10B981'
+  if (v >= 45) return '#F97316'
   if (v >= 30) return '#F59E0B'
   return '#EF4444'
 }
@@ -83,7 +83,7 @@ function Delta({ change, unit }) {
 
 function MetricCard({ label, value, count, format, sub, valueColor }) {
   return (
-    <div className="flex flex-col gap-1 rounded-card border-hairline border-border bg-card p-6">
+    <div className="flex flex-col gap-1 nexus-card p-6">
       <span className="nexus-label">{label}</span>
       <span
         className="text-[26px] font-semibold leading-none"
@@ -161,7 +161,6 @@ function HistoryChart({ data, color }) {
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        style={{ filter: `drop-shadow(0 0 6px ${color})` }}
         initial={reduce ? false : { pathLength: 0 }}
         animate={{ pathLength: 1 }}
         transition={{ duration: 1, ease: 'easeInOut' }}
@@ -209,7 +208,7 @@ export default function Sentiment() {
     <PageContainer title="Sentiment">
       {/* Headline: gauge (reduced) + the 7 sub-components */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <div className="flex flex-col items-center justify-center gap-3 rounded-card border-hairline border-border bg-card p-6 lg:col-span-1">
+        <div className="flex flex-col items-center justify-center gap-3 nexus-card p-6 lg:col-span-1">
           <span className="nexus-label">Fear &amp; Greed Index</span>
           {fgLoading ? (
             <span className="py-10 text-[13px] text-secondary">Chargement…</span>
@@ -228,7 +227,7 @@ export default function Sentiment() {
           )}
         </div>
 
-        <div className="rounded-card border-hairline border-border bg-card p-6 lg:col-span-2">
+        <div className="nexus-card p-6 lg:col-span-2">
           <span className="nexus-label">Composants de l'indice</span>
           <div className="mt-4 grid grid-cols-1 gap-x-8 gap-y-3.5 sm:grid-cols-2">
             {fg?.components?.length ? (
@@ -241,7 +240,7 @@ export default function Sentiment() {
       </div>
 
       {/* Reading */}
-      <div className="mt-5 rounded-card border-hairline border-border bg-card p-6">
+      <div className="mt-5 nexus-card p-6">
         <span className="nexus-label">Lecture du marché</span>
         <p className="mt-2 text-[14px] leading-relaxed text-primary">
           {score == null ? 'Indicateur en cours de chargement…' : reading(score)}
@@ -268,7 +267,7 @@ export default function Sentiment() {
       </div>
 
       {/* 30-day Fear & Greed history */}
-      <div className="mt-5 rounded-card border-hairline border-border bg-card p-6">
+      <div className="mt-5 nexus-card p-6">
         <div className="mb-3 flex items-center justify-between">
           <span className="nexus-label">Fear &amp; Greed — 30 jours</span>
           {score != null && (
@@ -289,7 +288,7 @@ export default function Sentiment() {
       {/* Put/Call ratio + sector sentiment */}
       <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
         {/* Put/Call */}
-        <div className="rounded-card border-hairline border-border bg-card p-6">
+        <div className="nexus-card p-6">
           <span className="nexus-label">Put/Call Ratio (CBOE)</span>
           <div className="mt-2 flex items-end gap-2">
             <span className="font-mono text-[28px] font-semibold leading-none text-primary">
@@ -309,7 +308,7 @@ export default function Sentiment() {
         </div>
 
         {/* Sector sentiment via Claude */}
-        <div className="rounded-card border-hairline border-border bg-card p-6">
+        <div className="nexus-card p-6">
           <div className="flex items-center justify-between gap-3">
             <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-primary">
               <IconSparkles size={15} stroke={1.5} className="text-accent" />
@@ -363,7 +362,7 @@ export default function Sentiment() {
                   return (
                     <span
                       key={s.key}
-                      className="inline-flex items-center gap-1.5 rounded-full border-hairline border-border px-2.5 py-1 text-[11px]"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-hover px-2.5 py-1 text-[11px]"
                     >
                       <span className="text-secondary">{s.label}</span>
                       {q && (

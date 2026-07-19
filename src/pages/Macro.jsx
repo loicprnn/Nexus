@@ -21,21 +21,21 @@ const INDICATORS = [
     label: 'Courbe des taux 10Y-2Y',
     note: 'Spread 10 ans − 2 ans. Négatif = inversion, signal de récession.',
     fmt: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(2)} pp`,
-    color: '#10B981',
+    color: '#F97316',
   },
   {
     id: 'DGS10',
     label: 'Taux US 10 ans',
     note: 'Rendement du Trésor américain à 10 ans.',
     fmt: (v) => `${v.toFixed(2)} %`,
-    color: '#10B981',
+    color: '#F97316',
   },
   {
     id: 'FEDFUNDS',
     label: 'Taux directeur Fed',
     note: 'Fed Funds Rate effectif.',
     fmt: (v) => `${v.toFixed(2)} %`,
-    color: '#10B981',
+    color: '#F97316',
   },
   {
     id: 'CPIAUCSL',
@@ -50,7 +50,7 @@ const INDICATORS = [
     label: 'Chômage US',
     note: "Taux de chômage (population active).",
     fmt: (v) => `${v.toFixed(1)} %`,
-    color: '#10B981',
+    color: '#F97316',
   },
   {
     id: 'M2SL',
@@ -58,7 +58,7 @@ const INDICATORS = [
     note: 'Agrégat M2 — corrélé aux marchés sur le long terme.',
     fmt: (v) => `${(v / 1000).toFixed(2)} Tr $`, // M2 en milliers de milliards (tient sur une ligne)
     deltaSuffix: ' Md $',
-    color: '#10B981',
+    color: '#F97316',
   },
 ]
 
@@ -78,7 +78,7 @@ function Delta({ change, suffix = ' pp' }) {
 function MacroCard({ id, label, note, fmt, yoy, color, deltaSuffix = ' pp' }) {
   const { data, loading, error } = useIndicator(id, { yoy })
   return (
-    <div className="flex flex-col gap-3 rounded-card border-hairline border-border bg-card p-6">
+    <div className="flex flex-col gap-3 nexus-card p-6">
       <div className="flex items-start justify-between gap-2">
         <span className="text-[12px] font-semibold text-primary">{label}</span>
         <span className="text-[10px] text-secondary">{data?.date ?? ''}</span>
@@ -156,7 +156,7 @@ function MacroAnalysis() {
   }, [ready])
 
   return (
-    <div className="mt-5 rounded-card border-hairline border-border bg-card p-6">
+    <div className="mt-5 nexus-card p-6">
       <div className="flex items-center justify-between gap-3">
         <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-primary">
           <IconSparkles size={15} stroke={1.5} className="text-accent" />

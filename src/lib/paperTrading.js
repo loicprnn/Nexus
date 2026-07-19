@@ -88,6 +88,44 @@ export function valuate(cash, trades, priceMap = {}) {
   return { positions, cash, holdingsValue, invested, equity, totalPnl, totalPnlPct }
 }
 
+// Realised P&L bucketed by calendar month. Walks the journal chronologically
+// with the same weighted-average cost basis as derivePositions, attributing each
+// sell's realised gain/loss to the month it occurred. Returns the last
+// `months` calendar months (oldest → newest), zero-filled, for a bar chart.
+const MONTH_LABELS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.']
+
+export function monthlyRealizedPnl(trades, months = 6) {
+  const cost = {} // symbol -> { qty, avgPrice }
+  const byMonth = {} // 'YYYY-MM' -> realised pnl
+  for (const t of [...trades].sort((a, b) => new Date(a.ts) - new Date(b.ts))) {
+    const p = cost[t.symbol] ?? (cost[t.symbol] = { qty: 0, avgPrice: 0 })
+    if (t.side === 'buy') {
+      const total = p.avgPrice * p.qty + t.price * t.qty
+      p.qty += t.qty
+      p.avgPrice = p.qty > EPS ? total / p.qty : 0
+    } else {
+      const d = new Date(t.ts)
+      const key = `${d.getFullYear()}-${d.getMonth()}`
+      byMonth[key] = (byMonth[key] ?? 0) + (t.price - p.avgPrice) * t.qty
+      p.qty -= t.qty
+      if (p.qty < EPS) {
+        p.qty = 0
+        p.avgPrice = 0
+      }
+    }
+  }
+
+  // Emit the trailing `months` months up to and including the current one.
+  const out = []
+  const now = new Date()
+  for (let i = months - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const key = `${d.getFullYear()}-${d.getMonth()}`
+    out.push({ key, label: MONTH_LABELS[d.getMonth()], pnl: byMonth[key] ?? 0 })
+  }
+  return out
+}
+
 // Validate a prospective order against cash / holdings. Returns an error string
 // (French, for direct display) or null when the order is executable.
 export function validateOrder({ side, symbol, qty, price, cash, trades }) {

@@ -7,7 +7,7 @@ import CountUp from './CountUp'
 export default function Gauge({
   value = 0,
   max = 100,
-  color = '#10B981',
+  color = '#F97316',
   label,
   size = 160,
 }) {
@@ -27,15 +27,15 @@ export default function Gauge({
   return (
     <div className="flex flex-col items-center">
       <svg width={size} height={height} viewBox={`0 0 ${size} ${height}`}>
-        {/* Track */}
+        {/* Track — light grey on the light theme */}
         <path
           d={`M ${stroke / 2} ${cy} A ${r} ${r} 0 0 1 ${size - stroke / 2} ${cy}`}
           fill="none"
-          stroke="#0A3D2E"
+          stroke="#F0F0F0"
           strokeWidth={stroke}
           strokeLinecap="round"
         />
-        {/* Value arc — neon glow in its colour */}
+        {/* Value arc */}
         <motion.path
           d={`M ${stroke / 2} ${cy} A ${r} ${r} 0 0 1 ${size - stroke / 2} ${cy}`}
           fill="none"
@@ -43,7 +43,6 @@ export default function Gauge({
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}
-          style={{ filter: `drop-shadow(0 0 6px ${color})` }}
           initial={reduce ? false : { strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: circumference * (1 - ratio) }}
           transition={{ duration: 1, ease: 'easeInOut' }}

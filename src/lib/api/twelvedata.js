@@ -96,6 +96,35 @@ async function fetchSeries(tdSymbols, { interval = '5min', outputsize = 78 } = {
   return map
 }
 
+// OHLC candles (oldest-first) for ONE symbol, for the Analyse candlestick chart.
+// Returns [] for symbols Twelve Data can't serve (indices, foreign listings) so
+// the caller can fall back to the line view. Cached like quotes.
+export function getOhlcSeries(symbol, { interval = '1day', outputsize = 60 } = {}) {
+  const td = toTwelveData(symbol)
+  if (!td) return Promise.resolve([])
+  const key = `td:ohlc:${td}:${interval}:${outputsize}`
+  return cached(key, TTL.QUOTES, async () => {
+    const json = await proxyJson({
+      endpoint: 'time_series',
+      symbol: td,
+      interval,
+      outputsize: String(outputsize),
+    })
+    const entry = keyBySymbol(json, [td])[td]
+    if (!entry || entry.status === 'error' || !Array.isArray(entry.values)) return []
+    return entry.values
+      .map((v) => ({
+        time: v.datetime,
+        open: num(v.open),
+        high: num(v.high),
+        low: num(v.low),
+        close: num(v.close),
+      }))
+      .filter((b) => b.open != null && b.high != null && b.low != null && b.close != null)
+      .reverse() // Twelve Data returns newest-first
+  })
+}
+
 // Batched quotes for original (Yahoo-style) symbols. Returns standard quote
 // objects { symbol, price, prevClose, change, changePct, currency, series } for
 // the symbols Twelve Data could serve. Symbols it can't serve are simply absent

@@ -116,9 +116,9 @@ export function computeAssetScore({ technique, sentiment, macro } = {}) {
 
 // Score → design-system color (green / blue / amber / red).
 export function scoreColor(score10) {
-  if (score10 == null) return '#10B981'
+  if (score10 == null) return '#F97316'
   if (score10 >= 6.5) return '#22C55E'
-  if (score10 >= 4.5) return '#10B981'
+  if (score10 >= 4.5) return '#F97316'
   if (score10 >= 3) return '#F59E0B'
   return '#EF4444'
 }
