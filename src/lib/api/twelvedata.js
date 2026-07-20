@@ -13,6 +13,36 @@ function num(x) {
   return Number.isFinite(n) ? n : null
 }
 
+// --- Global credit throttle --------------------------------------------------
+// Twelve Data's free plan allows only 8 credits/minute (1 credit per symbol).
+// Every widget fetching at once (ticker + globe + favoris + movers…) blows that
+// budget instantly and everything 429s. This serialises ALL outgoing calls and
+// admits them only when enough credits are free in a rolling 60s window, so the
+// dashboard fills in progressively instead of failing wholesale. Combined with
+// the 15-min cache, later loads are instant.
+const TD_BUDGET = 8
+const TD_WINDOW = 61 * 1000 // 60s window + 1s slack
+let spent = [] // timestamps of recently-spent credits
+let queue = Promise.resolve() // serialises reservations in call order
+
+function reserveCredits(credits) {
+  const cost = Math.min(Math.max(credits, 1), TD_BUDGET)
+  queue = queue.then(async () => {
+    for (;;) {
+      const now = Date.now()
+      spent = spent.filter((t) => now - t < TD_WINDOW)
+      if (spent.length + cost <= TD_BUDGET) {
+        const t = Date.now()
+        for (let i = 0; i < cost; i++) spent.push(t)
+        return
+      }
+      const wait = TD_WINDOW - (now - spent[0]) + 50
+      await new Promise((r) => setTimeout(r, wait))
+    }
+  })
+  return queue
+}
+
 // Map our catalog (Yahoo-style) symbols to Twelve Data symbology, but ONLY for
 // instrument classes the (free) plan can actually serve: US equities and forex.
 // Indices (`^…`), futures (`=F`) and foreign listings (`.AS`) return null and go
@@ -31,6 +61,9 @@ export function toTwelveData(sym) {
 }
 
 async function proxyJson(params) {
+  // Credit cost = number of symbols in the batch (Twelve Data bills per symbol).
+  const credits = params.symbol ? params.symbol.split(',').length : 1
+  await reserveCredits(credits)
   const qs = new URLSearchParams(params).toString()
   const res = await fetch(`${PROXY}?${qs}`)
   const json = await res.json().catch(() => null)

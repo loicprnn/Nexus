@@ -68,7 +68,11 @@ export function useQuotes(symbols, opts) {
 // useQuotes; `loading` clears once the first chunk lands.
 export function useChunkedQuotes(
   symbols,
-  { chunkSize = 6, staggerMs = 62 * 1000, sparkline = false } = {},
+  // The Twelve Data client now enforces the 8-credits/min budget globally (a
+  // rolling-window throttle), so chunks no longer need a big per-hook stagger —
+  // they all enter the shared queue up front and are admitted as credits free
+  // up. A tiny stagger just preserves a pleasant wave-fill order.
+  { chunkSize = 6, staggerMs = 1500, sparkline = false } = {},
 ) {
   const symKey = symbols.join(',')
   const [bySymbol, setBySymbol] = useState({})
